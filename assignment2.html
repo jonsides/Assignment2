@@ -18,13 +18,17 @@
     <script>
         var jsPsych = initJsPsych();
 
+        var subject = Math.floor(Math.random()*100000);
+
         var instructions= {
             type: jsPsychHtmlButtonResponse,
             stimulus:  '<p style="font-size: 48px;"> Welcome to the experiment!</p> <h1> <p style="text-align:left;""> Instructions: </p> </h1> <p style="font-size: 24px; text-align:left;"> 1. A trivia question will appear on the screen for 5 seconds. Following the question, you will be asked whether you: <br> <br>  a) <u>know</u> the answer <br> b) <u>do not know</u> the answer <br> c) have <u>another word</u> in mind, or <br> d) have the answer on the <u>tip of your tongue</u> <br> <br> 2. After selectiong one of the options above, you will be prompted to type in the answer. </p>',
             prompt: 'Click the button above to procceed to some practice trials before starting the actual experiment.',
             choices: ['practice'], 
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
                 TrialType: 'instruct'
             } 
         };
@@ -35,7 +39,7 @@
             choices: ["NO_KEYS"],
             trial_duration: 5000,
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
                 prime_condition: jsPsych.timelineVariable('prime_condition'),
                 list:jsPsych.timelineVariable('list'),
                 TrialType: 'sentence'
@@ -48,7 +52,7 @@
             choices: ["NO_KEYS"],
             trial_duration: 250,
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
                 prime_condition: jsPsych.timelineVariable('prime_condition'),
                 list:jsPsych.timelineVariable('list'),
                 TrialType: 'prime'
@@ -60,7 +64,7 @@
             stimulus: 'do you...',
             choices: ['know the answer', 'do not know the answer', 'have another word in mind', 'on the tip of the tongue'],
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
                 prime_condition: jsPsych.timelineVariable('prime_condition'),
                 list:jsPsych.timelineVariable('list'),
                 TrialType: 'state'
@@ -70,14 +74,15 @@
         var response= {
             type: jsPsychSurveyText,
             preamble: jsPsych.timelineVariable('prompt'),
-            questions: [ {prompt: 'Answer:'}],
+            questions: [{prompt: 'Answer:'}],
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
                 prime_condition: jsPsych.timelineVariable('prime_condition'),
                 list:jsPsych.timelineVariable('list'),
-                TrialType: 'response'
+                TrialType: 'response',
+
             },
-            on_finish: function(data){
+            on_finish: function(data) {
                 // score the response as correct or incorrect.
                 if(jsPsych.pluginAPI.compareKeys(data.response, jsPsych.timelineVariable('target')))
                   {data.correct = true;}
@@ -85,6 +90,7 @@
                   {data.correct = false; } 
             }
         };
+
         var feedback = {
             type: jsPsychHtmlKeyboardResponse,
             stimulus: function(){
@@ -94,6 +100,12 @@
             },
             choices : "NO_KEYS",
             trial_duration: 2000,
+            data: {
+                subject_id: subject,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
+                TrialType: 'feedback'
+            }
         };
 
         var practice_procedure = {
@@ -107,12 +119,12 @@
             stimulus:  'This concludes the practice phase. Click below to proceed to the experiment.',
             choices: ['begin experiment'],
             data: {
-                subject_id: subject_id,
+                subject_id: subject,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
                 TrialType: 'instruct'
             } 
         };
-
-        var subject_id = Math.floor(Math.random()*100000);
 
         var list = [1,2,3,4]
 
