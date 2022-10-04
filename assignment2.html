@@ -22,7 +22,11 @@
             type: jsPsychHtmlButtonResponse,
             stimulus:  '<p style="font-size: 48px;"> Welcome to the experiment!</p> <h1> <p style="text-align:left;""> Instructions: </p> </h1> <p style="font-size: 24px; text-align:left;"> 1. A trivia question will appear on the screen for 5 seconds. Following the question, you will be asked whether you: <br> <br>  a) <u>know</u> the answer <br> b) <u>do not know</u> the answer <br> c) have <u>another word</u> in mind, or <br> d) have the answer on the <u>tip of your tongue</u> <br> <br> 2. After selectiong one of the options above, you will be prompted to type in the answer. </p>',
             prompt: 'Click the button above to procceed to some practice trials before starting the actual experiment.',
-            choices: ['click to continue']  
+            choices: ['practice'], 
+            data: {
+                subject_id: subject_id,
+                TrialType: 'instruct'
+            } 
         };
 
         var sentence= {
@@ -30,7 +34,12 @@
             stimulus: jsPsych.timelineVariable('prompt'),
             choices: ["NO_KEYS"],
             trial_duration: 5000,
-
+            data: {
+                subject_id: subject_id,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
+                TrialType: 'sentence'
+            }
         };
 
         var prime= {
@@ -38,29 +47,44 @@
             stimulus: jsPsych.timelineVariable('prime_given'),
             choices: ["NO_KEYS"],
             trial_duration: 250,
-
+            data: {
+                subject_id: subject_id,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
+                TrialType: 'prime'
+            }
         };
 
         var state= {
             type: jsPsychHtmlButtonResponse,
             stimulus: 'do you...',
             choices: ['know the answer', 'do not know the answer', 'have another word in mind', 'on the tip of the tongue'],
-
+            data: {
+                subject_id: subject_id,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
+                TrialType: 'state'
+            }
         };
 
         var response= {
             type: jsPsychSurveyText,
+            preamble: jsPsych.timelineVariable('prompt'),
             questions: [ {prompt: 'Answer:'}],
-
+            data: {
+                subject_id: subject_id,
+                prime_condition: jsPsych.timelineVariable('prime_condition'),
+                list:jsPsych.timelineVariable('list'),
+                TrialType: 'response'
+            },
             on_finish: function(data){
                 // score the response as correct or incorrect.
                 if(jsPsych.pluginAPI.compareKeys(data.response, jsPsych.timelineVariable('target')))
                   {data.correct = true;}
                 else 
-                  {data.correct = false; }
+                  {data.correct = false; } 
             }
         };
-
         var feedback = {
             type: jsPsychHtmlKeyboardResponse,
             stimulus: function(){
@@ -69,13 +93,23 @@
                else {return "WRONG!";}
             },
             choices : "NO_KEYS",
-            trial_duration: 3000
+            trial_duration: 2000,
         };
 
         var practice_procedure = {
             timeline: [sentence, prime, state, response, feedback],
             timeline_variables: listPractice,
             randomize_order: false
+        };
+
+        var instructions2= {
+            type: jsPsychHtmlButtonResponse,
+            stimulus:  'This concludes the practice phase. Click below to proceed to the experiment.',
+            choices: ['begin experiment'],
+            data: {
+                subject_id: subject_id,
+                TrialType: 'instruct'
+            } 
         };
 
         var subject_id = Math.floor(Math.random()*100000);
@@ -104,7 +138,7 @@
             stimulus: 'Thank you for participating! Click any key to end the experiment.'
         };
 
-        jsPsych.run([instructions]);
+        jsPsych.run([instructions, practice_procedure, instructions2, experiment_procedure, end_screen]);
     </script>
 </body>
 </html>
