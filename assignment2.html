@@ -6,8 +6,12 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.1"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.1"></script>
     <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.1"></script>
+    <script src="list1.js"></script>
+    <script src="list2.js"></script>
+    <script src="list3.js"></script>
+    <script src="list4.js"></script>
+    <script src="listPractice.js"></script>
     <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
-
 </head>
 
 <body>
@@ -46,21 +50,61 @@
 
         var response= {
             type: jsPsychSurveyText,
-            questions: [
-                {prompt: 'Answer:'}
-            ]
+            questions: [ {prompt: 'Answer:'}],
 
+            on_finish: function(data){
+                // score the response as correct or incorrect.
+                if(jsPsych.pluginAPI.compareKeys(data.response, jsPsych.timelineVariable('target')))
+                  {data.correct = true;}
+                else 
+                  {data.correct = false; }
+            }
         };
 
-        
+        var feedback = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: function(){
+               var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+               if(last_trial_correct){return "CORRECT!"; }
+               else {return "WRONG!";}
+            },
+            choices : "NO_KEYS",
+            trial_duration: 3000
+        };
+
+        var practice_procedure = {
+            timeline: [sentence, prime, state, response, feedback],
+            timeline_variables: listPractice,
+            randomize_order: false
+        };
+
+        var subject_id = Math.floor(Math.random()*100000);
+
+        var list = [1,2,3,4]
+
+        var CONDITION = list[Math.floor(Math.random() * list.length)];
+
+        var teststimuli = []
+            if(CONDITION == 1){teststimuli = list1}
+            else if(CONDITION == 2){teststimuli = list2}
+            else if(CONDITION == 3){teststimuli = list3}
+            else{teststimuli = list4}
+            
+            console.log("list=", list)
+            console.log("CONDITION=", CONDITION)
+            console.log("teststimuli=", teststimuli)
+
+        var experiment_procedure={
+            timeline:[sentence, prime, state, response],
+            timeline_variables:teststimuli, randomize_order:true
+        };
+
+        var end_screen= {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: 'Thank you for participating! Click any key to end the experiment.'
+        };
 
         jsPsych.run([instructions]);
     </script>
-
 </body>
-
-
-
-
-
 </html>

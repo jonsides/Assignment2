@@ -1,4 +1,4 @@
-[
+var listPractice=[
     {
       "target": "Biden",
       "prompt": "President of the United States of America in 2022",
